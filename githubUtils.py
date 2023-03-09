@@ -1,4 +1,5 @@
 import github as gh
+import logging
     
 def createPrWithBlobs(github, destRepo, sourceBranchName, targetBranchName, blobs):
     repo = github.get_repo(destRepo)
@@ -12,8 +13,11 @@ def createPrWithBlobs(github, destRepo, sourceBranchName, targetBranchName, blob
     parent = repo.get_git_commit(sha=targetBranchSha)
     commit = repo.create_git_commit("commit_message", tree, [parent])
     targetBranchRef.edit(sha=commit.sha)
+    logging.info(f"Created commit {commit.sha} in new branch {targetBranchName}")
 
-    repo.create_pull(title="PR title", body="PR body", base=sourceBranchName, head=targetBranchName)    
+    pr = repo.create_pull(title="PR title", body="PR body", base=sourceBranchName, head=targetBranchName)
+    logging.info(f"Created PR at {pr.html_url}")
+    
     
 # This is slower than expected... MT?
 def createBlobsInRepo(github, repoName, fileContentMap):
@@ -25,6 +29,7 @@ def createBlobsInRepo(github, repoName, fileContentMap):
             blob = repo.create_git_blob(contentFile.content, contentFile.encoding)
             element = gh.InputGitTreeElement(path=filePath, mode='100644', type='blob', sha=blob.sha)
             newElements.append(element)
+            logging.info(f"Created blob for `{contentFile.name}`")
         except Exception as inst:
-            print("Cannot sync file " + contentFile.name + ": " + str(inst))
+            logging.error("Cannot sync file " + contentFile.name + ": " + str(inst))
     return newElements

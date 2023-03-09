@@ -14,7 +14,7 @@
         },
         {
             "sourceRepo": "TinderBackend/events.sdk",
-            "sourceUrl": "docs/img",
+            "sourceUrl": "docs",
             "destUrl": ""
         }        
     ]
