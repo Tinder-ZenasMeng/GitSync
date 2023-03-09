@@ -1,0 +1,21 @@
+{
+    "destRepo": "Tinder-ZenasMeng/TestDestinationRepo",
+    "mainBranch": "main",
+    "files": [
+        {
+            "sourceRepo": "TinderBackend/events.sdk",
+            "sourceUrl": "README.md",
+            "destUrl": "docs/README.md"
+        },
+        {
+            "sourceRepo": "TinderBackend/events.sdk",
+            "sourceUrl": "CHANGELOG.md",
+            "destUrl": "docs/CHANGELOG.md"
+        },
+        {
+            "sourceRepo": "TinderBackend/events.sdk",
+            "sourceUrl": "docs/img",
+            "destUrl": ""
+        }        
+    ]
+}
