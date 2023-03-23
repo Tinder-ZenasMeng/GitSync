@@ -1,3 +1,5 @@
+import sys
+sys.path.insert(0, "./lib")
 from syncEntry import SyncEntry
 from dotenv import load_dotenv
 from typing import MutableSequence, Tuple
