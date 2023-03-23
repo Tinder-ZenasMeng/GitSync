@@ -26,7 +26,8 @@ def createPathFileMap(github, syncEntryList: MutableSequence[SyncEntry]) -> dict
         if isinstance(sourceContentFile, list):
             dirCrawl = utils.getFilesFromDirRecursive(github, syncEntry.sourceRepo, syncEntry.sourceUrl)
             for entry in dirCrawl:
-                destPath = os.path.join(syncEntry.destUrl, entry.path)
+                strippedRootDir = entry.path[entry.path.find("/") + 1:]
+                destPath = os.path.join(syncEntry.destUrl, strippedRootDir)
                 pathFileMap[destPath] = (syncEntry.yamlPath, entry)
                 logging.info(f"Map for `{destPath}` created.")
         else:
@@ -36,6 +37,7 @@ def createPathFileMap(github, syncEntryList: MutableSequence[SyncEntry]) -> dict
 
 # Removes items from `pathFileMap` if the file's SHA is equivalent to the one in the destination repo.
 def getEquivalentSourceFiles(github, pathFileMap, destRepoName):
+    logging.info("Starting comparison with destination files.")
     equivalentList = []
     for filePath, tuple in pathFileMap.items():
         contentFile = tuple[1]
@@ -65,12 +67,14 @@ def constructNewYaml(yamlData, pathFileMap):
     for filePath, tuple in pathFileMap.items():
         yamlPath = tuple[0]
         contentFile = tuple[1]
+        # We need to strip `docs` from the path, because mkdocs runs off of this directory,
+        # instead of the root of the repo.
+        strippedFilePath = filePath[filePath.find("/") + 1:]
         
         if yamlPath not in yamlMap:
-            yamlMap[yamlPath] = filePath
+            yamlMap[yamlPath] = strippedFilePath
         else:
-            contentPath = contentFile.path.split("/")[0]
-            rootPath = filePath.split(contentPath)[0][:-1]
+            rootPath = strippedFilePath.split("/")[0]
             yamlMap[yamlPath] = f"... | {rootPath}/**"
             
     for yamlPath, filePath in yamlMap.items():
