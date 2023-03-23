@@ -1,20 +1,20 @@
 {
-    "destRepo": "Tinder-ZenasMeng/TestDestinationRepo",
+    "destRepo": "Tinder-ZenasMeng/EtherealSandbox",
     "mainBranch": "main",
     "files": [
         {
             "sourceRepo": "TinderBackend/events.sdk",
             "sourceUrl": "README.md",
-            "destUrl": "docs/README.md"
+            "destUrl": "README.md"
         },
         {
             "sourceRepo": "TinderBackend/events.sdk",
             "sourceUrl": "CHANGELOG.md",
-            "destUrl": "docs/CHANGELOG.md"
+            "destUrl": "worker/elkwriter/CHANGELOG.md"
         },
         {
             "sourceRepo": "TinderBackend/events.sdk",
-            "sourceUrl": "docs",
+            "sourceUrl": "docs/dne.md",
             "destUrl": ""
         }        
     ]

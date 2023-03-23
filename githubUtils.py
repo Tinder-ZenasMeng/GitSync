@@ -20,12 +20,13 @@ def createPrWithBlobs(github, destRepo, sourceBranchName, targetBranchName, blob
     
     
 # This is slower than expected... MT?
-def createBlobsInRepo(github, repoName, fileContentMap):
+def createBlobElementsInRepo(github, repoName, fileContentMap):
     repo = github.get_repo(repoName)
     
     newElements = []
-    for filePath, contentFile in fileContentMap.items():
+    for filePath, tuple in fileContentMap.items():
         try:
+            contentFile = tuple[1]
             blob = repo.create_git_blob(contentFile.content, contentFile.encoding)
             element = gh.InputGitTreeElement(path=filePath, mode='100644', type='blob', sha=blob.sha)
             newElements.append(element)

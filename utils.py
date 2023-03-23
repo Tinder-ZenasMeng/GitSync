@@ -1,5 +1,6 @@
 import hashlib
 import json
+from github import Github, ContentFile
 
 def sha1DigestGit(size, dataStr):
     data = "blob " + str(size) + "\0" + dataStr
@@ -22,23 +23,26 @@ def sha1DigestFile(path):
     return sha1.hexdigest()
 
 
-def writeBytesToFile(fileName, bytes):
+def writeBytesToFile(fileName: str, bytes: bytearray):
     file = open(fileName, 'w')
     file.write(bytes)
     file.close()
 
-def readJson(path):
+def readJsonFile(path: str) -> dict:
     f = open(path, "r")
     data = json.load(f)
     f.close()
     return data
 
-def getFile(github, repo, filePath):
+def readJsonString(string: str) -> dict:
+    return json.loads(string)
+
+def getFile(github: Github, repo, filePath) -> ContentFile.ContentFile:
     repo = github.get_repo(repo)
     contents = repo.get_contents(filePath)
     return contents
 
-def getFilesFromDirRecursive(github, repo, dirPath):
+def getFilesFromDirRecursive(github: Github, repo: str, dirPath: str):
     allFiles = []
     repo = github.get_repo(repo)
     contents = repo.get_contents(dirPath)
