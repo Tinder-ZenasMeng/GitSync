@@ -6,6 +6,7 @@ import os
 import github as gh
 import utils
 import githubUtils
+import yamlUtils
 import datetime
 import logging
 import ruamel.yaml
@@ -55,54 +56,7 @@ def getEquivalentSourceFiles(github, pathFileMap, destRepoName):
             equivalentList.append(filePath)
     return equivalentList
 
-# Logic might be a bit complex here. Worth refactoring later.
-def constructNewYaml(yamlData, pathFileMap):
-    yamlRes = copy.deepcopy(yamlData)
-    
-    # Consolidate directories here.
-    # We check for dupe yaml paths. If there are any, we can assume there is a directory.
-    # We then get the root yaml path (path without directory), and set the destination URL as `... | {rootPath}/**`
-    # which will have MkDocs recursively browse that directory.
-    yamlMap = {} # <yamlPath, [filePath]>
-    for filePath, tuple in pathFileMap.items():
-        yamlPath = tuple[0]
-        contentFile = tuple[1]
-        # We need to strip `docs` from the path, because mkdocs runs off of this directory,
-        # instead of the root of the repo.
-        strippedFilePath = filePath[filePath.find("/") + 1:]
-        
-        if yamlPath not in yamlMap:
-            yamlMap[yamlPath] = strippedFilePath
-        else:
-            rootPath = strippedFilePath.split("/")[0]
-            yamlMap[yamlPath] = f"... | {rootPath}/**"
-            
-    for yamlPath, filePath in yamlMap.items():
-        args = yamlPath.split("/")
-        
-        # Navigate yaml until you reach the penultimate key.
-        head = yamlRes['nav']
-        for arg in args[:-1]:
-            # This is a list of dicts. 
-            # Each dict should only have one KV pair.
-            map = {}
-            for idx, h in enumerate(head):
-                map[list(h.keys())[0]] = idx
-            if arg in map:
-                head = head[map[arg]][arg]
-            else:
-                head.append({arg: []})
-                head = head[-1][arg]
-        # Append KV pair of { yamlPath[-1]: filePath }
-        # Or if directory, set it as its own array.
-        if isinstance(head, list):
-            if "..." in filePath:
-                head.append({args[-1]: [filePath]})
-            else:
-                head.append({args[-1]: filePath})
-    return yamlRes
-
-def workSingleRepo(github, configData):
+def processSingleRepo(github, configData):
     # Read json file
     MKDOCS_STR = "mkdocs.yml"
     DEST_REPO = configData["destRepo"]
@@ -123,21 +77,24 @@ def workSingleRepo(github, configData):
     for item in equivalentList:
         del pathFileMap[item]
     
-    # Update yaml.
-    # Assumes a `mkdocs.yml` at root of dest_repo.
-    yamlConfig = utils.getFile(github, DEST_REPO, MKDOCS_STR)
-    yamlContent = yamlConfig.decoded_content
-    yamlData = ruamel.yaml.load(yamlContent, Loader=ruamel.yaml.RoundTripLoader)
-    newYaml = constructNewYaml(yamlData, pathFileMap)
+    if len(pathFileMap) == 0:
+        logging.info(f"Repo `{DEST_REPO}`: No files needed to be sync'd.")
+        return
     
     # Create blobs inside destination repo based off of URL maps.
     blobs = githubUtils.createBlobElementsInRepo(github, DEST_REPO, pathFileMap)
+
+    # Update yaml; assumes a `mkdocs.yml` at root of dest_repo.
+    yamlConfig = utils.getFile(github, DEST_REPO, MKDOCS_STR)
+    yamlContent = yamlConfig.decoded_content
+    yamlData = ruamel.yaml.load(yamlContent, Loader=ruamel.yaml.RoundTripLoader)
     
+    newYaml = yamlUtils.constructNewYaml(yamlData, pathFileMap)
+    
+    # # Create yaml blob.
     newYamlSerial = ruamel.yaml.dump(newYaml, Dumper=ruamel.yaml.RoundTripDumper)
-    repo = github.get_repo(DEST_REPO)
-    blob = repo.create_git_blob(newYamlSerial, "utf-8")
-    element = gh.InputGitTreeElement(path=MKDOCS_STR, mode='100644', type='blob', sha=blob.sha)
-    blobs.append(element)
+    yamlBlob = githubUtils.createBlobElementInRepo(github, DEST_REPO, newYamlSerial, "utf-8", MKDOCS_STR)
+    blobs.append(yamlBlob)
 
     # Create new branch and push PR.
     githubUtils.createPrWithBlobs(github, DEST_REPO, MAIN_BRANCH, NEW_BRANCH, blobs)
@@ -158,7 +115,7 @@ def main():
         try:
             repoConfigFile = utils.getFile(github, repo, EXTERNAL_SYNC_CONFIG)
             repoConfigData = utils.readJsonString(repoConfigFile.decoded_content)
-            workSingleRepo(github, repoConfigData)
+            processSingleRepo(github, repoConfigData)
         except Exception as e:
             logging.error(f"Unable to process repo {repo} due to {e}")
             continue

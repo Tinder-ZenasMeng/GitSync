@@ -1,0 +1,18 @@
+{
+    "destRepo": "TinderBackend/docs.engineering",
+    "mainBranch": "main",
+    "files": [
+        {
+            "sourceRepo": "TinderBackend/events.sdk",
+            "sourceUrl": "CHANGELOG.md",
+            "destUrl": "docs/abc.md",
+            "yamlPath": "PathA"
+        },
+        {
+            "sourceRepo": "TinderBackend/events.sdk",
+            "sourceUrl": "docs",
+            "destUrl": "docs/instrumentation",
+            "yamlPath": "Imported Knowledge Bases"
+        }          
+    ]
+}

@@ -34,3 +34,13 @@ def createBlobElementsInRepo(github, repoName, fileContentMap):
         except Exception as inst:
             logging.error("Cannot sync file " + contentFile.name + ": " + str(inst))
     return newElements
+
+def createBlobElementInRepo(github, repoName, data, encoding, filePath):
+    repo = github.get_repo(repoName)
+    try:
+        blob = repo.create_git_blob(data, encoding)
+        element = gh.InputGitTreeElement(path=filePath, mode='100644', type='blob', sha=blob.sha)
+        logging.info(f"Created blob for `{filePath}`")
+        return element
+    except Exception as inst:
+        logging.error(f"Cannot create blob {filePath}: " + str(inst))
