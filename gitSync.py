@@ -107,8 +107,10 @@ def main():
     load_dotenv()
     github = gh.Github(os.getenv("GH_TOKEN"))
     
+    EXTERNAL_CONFIG_FILE="external.json"
+    
     # Experimental config
-    configData = utils.readJsonFile(os.getenv("CONFIG_FILE_V2"))
+    configData = utils.readJsonFile(EXTERNAL_CONFIG_FILE)
     SUPPORTED_REPOS = configData["supportedRepos"]
     EXTERNAL_SYNC_CONFIG = "external-sync.json"
     
@@ -124,6 +126,7 @@ def main():
 
     # TODO
     # Ideas
+    ## Only do yaml on flag.
     ## Add config setting limit fileTypes?
     ## Front matter with comment on externally sync'd files?
         ### SHA, though.

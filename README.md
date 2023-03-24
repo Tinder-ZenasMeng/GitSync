@@ -1,7 +1,6 @@
 # Git Sync
 
 ## Overview
-
 A script that syncs over files and directories to specified repositories. 
 
 This currently has hardcoded support for mkdocs.
@@ -15,6 +14,9 @@ This currently has hardcoded support for mkdocs.
 
 ## Development
 
+### Dependencies
+Dependencies can be installed via `pip install -r requirements.txt`.
+
 ### Environment variables
 This repo uses `python-dotenv` to retrieve environment variables.
 The most notable environment variable that must be supplied by the user is the `GH_TOKEN`, which will provide Github access.
@@ -25,4 +27,3 @@ The most notable environment variable that must be supplied by the user is the `
 * Non-conventional yaml 1.2 spec notation support
     * Mkdocs sometimes has the `!!` notation, which does not properly read/write.
 * Mkdocs support is currently hard coded and needs to be split out.
-* 

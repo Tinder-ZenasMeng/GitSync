@@ -1,5 +1,4 @@
 import copy
-from collections.abc import Iterable
 
 # Consolidate directories here.
 # We check for dupe yaml paths. If there are any, we can assume there is a directory.
@@ -52,7 +51,8 @@ def navigateToYamlPath(root, path, normalize = True):
         i = i + 1
             
     # At this point, you are at the specified node, but if your node
-    # is a singular item, this might not be helpful.
+    # is a singular item, this might not be helpful. On `normalize` flag,
+    # convert to dict.
     if normalize:
         if not isinstance(head, list):
             prev[lastIndex] = { arg: [head] }
